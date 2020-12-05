@@ -1,4 +1,4 @@
-CPPFLAGS=-Wall -Wextra --std=c++2a -v
+CPPFLAGS=-Wall -Wextra --std=c++2a -v -g
 LDFLAGS=
 LDLIBS=
 TARGET=aoc
