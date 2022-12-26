@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fmt::Display, cmp::Ordering};
+use std::{collections::VecDeque, cmp::Ordering};
 
 use nom::{
     IResult,
@@ -137,6 +137,7 @@ struct MonekyBehaviour {
     inspected: u64,
 }
 
+#[allow(unused)]
 fn print_monkeys(monkeys: &Vec<MonekyBehaviour>) {
     for monkey in monkeys.iter() {
         println!("Monkey {}: {:?}, inspected {:}", monkey.id, monkey.items, monkey.inspected)
@@ -188,7 +189,7 @@ fn parse_input(input: &str) -> IResult<&str, Vec<MonekyBehaviour>> {
 pub fn process_part1(input: &str) -> String {
     let (_, mut monkeys) = parse_input(input).unwrap();
 
-    for round in 1..21 {
+    for _round in 1..21 {
         for i in 0..monkeys.len() {
             let current_monkey = monkeys[i].clone();
 
