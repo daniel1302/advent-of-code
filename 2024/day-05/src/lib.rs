@@ -1,34 +1,22 @@
-use std::{cmp::Ordering, collections::HashMap, vec};
-use itertools::Itertools;
+use std::collections::HashMap;
 
-type OrderingRules = HashMap<i32, Vec<i32>>;
-type Updates = Vec<Vec<i32>>;
+type OrderingRules = HashMap<String, ()>;
+type UpdateLine<'a> = Vec<&'a str>;
+type Updates<'a> = Vec<UpdateLine<'a>>;
 
 fn parse_input(input: &str) -> (OrderingRules, Updates) {
-    let ordering_rules_chunks = input
+    let ordering_rules = input
         .lines()
-        .filter_map(
-            |val| {
-                let rule: Vec<i32> = val
-                    .split("|")
-                    .filter_map(|v| v.parse::<i32>().ok() )
-                    .collect();
-
-                if rule.len() == 2 {
-                    Some((rule.get(0).unwrap().to_owned(), rule.get(1).unwrap().to_owned()))
-                } else {
-                    None
-                }                
-            }
-        );
+        .filter(|line| line.contains("|"))
+        .map(|line| (line.to_owned(), ()))
+        .collect::<OrderingRules>();
 
         let updates: Updates = input
         .lines()
         .filter_map(
             |val| {
-                let rule: Vec<i32> = val
+                let rule: Vec<&str> = val
                     .split(",")
-                    .filter_map(|v| v.parse::<i32>().ok() )
                     .collect();
 
                 if rule.len() > 1 {
@@ -40,61 +28,58 @@ fn parse_input(input: &str) -> (OrderingRules, Updates) {
         )
         .collect();
 
-        let ordering_rules: OrderingRules = {
-            let mut ordering_rules = HashMap::new();
-            for rule in ordering_rules_chunks {
-                ordering_rules.entry(rule.0).or_insert(vec![]);
-                ordering_rules.get_mut(&rule.0).unwrap().push(rule.1);
-            }
-
-            ordering_rules
-        };
-
 
     (ordering_rules, updates)
 }
 
-fn check_update(rules: &OrderingRules, update: &Vec<i32>) -> bool {
-    let correct_order = |page, pages: &[i32]| -> bool {
-        let empty_rule = vec![];
-        let page_rule = rules.get(page).unwrap_or(&empty_rule);
-        pages
-            .iter()
-            .all(|p| page_rule.contains(p))
-    };
-
-    let violates_rule = |page: i32, pages: &[i32]| -> bool {
-
-    };
-
+fn is_valid_update(rules: &OrderingRules, update: &UpdateLine) -> bool {
     update
-        .iter()
-        .enumerate()
-        .all(|(idx, cur_page)| {
-                correct_order(cur_page, &update[idx+1..])
-        })
+        .windows(2)
+        .all(|pages| rules.contains_key(
+            format!("{}|{}", pages.get(0).unwrap(), pages.get(1).unwrap()).as_str()
+        ))
 }
 
 pub fn process_part1(input: &str) -> String {
     let(rules, updates) =  parse_input(input);
 
-    println!("{:?}", rules);
-    // let violates_rule: bool = |p1: i32, p2: i32| 
-
-    let valid_updates: Vec<&Vec<i32>> = updates
+    updates
         .iter()
-        .filter(|&update| {
-            check_update(&rules, update)
-        })
-        .collect();
-
-    println!("{:?}", valid_updates);
-
-    "".to_string()
+        .filter(|&update| is_valid_update(&rules, update))
+        .map(|update| update
+            .get(update.len()/2).unwrap()
+            .parse::<i32>()
+            .unwrap()
+        )
+        .sum::<i32>()
+        .to_string()
 }
 
 pub fn process_part2(input: &str) -> String {
-   "".to_string()
+    let(rules, updates) =  parse_input(input);
+    let violate_rule = |p1: &str, p2: &str| {
+        !rules.contains_key(format!("{}|{}", p1, p2).as_str())
+    };
+
+    updates
+        .iter()
+        .filter(|update| !is_valid_update(&rules, update))
+        .map(|update| {
+            let mut update_sorted = update.clone();
+            update_sorted.sort_by(|&a, &b| {
+                match violate_rule(a, b) {
+                    true => std::cmp::Ordering::Less,
+                    false => std::cmp::Ordering::Greater,
+                }
+            });
+
+            update_sorted
+                .get(update.len()/2).unwrap()
+                .parse::<i32>()
+                .unwrap()
+        })
+        .sum::<i32>()
+        .to_string()
 }
 
 #[cfg(test)]
@@ -122,11 +107,6 @@ mod tests {
 75|13
 53|13
 
-75,47,61,53,29
-97,61,53,29,13
-75,29,13
-75,97,47,61,53
-61,13,29
 97,13,75,29,47";
 
     #[test]
