@@ -29,12 +29,6 @@ fn is_report_safe(report_line: &[i32]) -> bool {
         .clone()
         .all(|item| item.abs() > 0 && item.abs() < 4);
 
-    // println!("Diffs: {:?}", report_diffs.collect::<Vec<i32>>());
-
-    // println!("All safe: {:?}", all_safe_values);
-    // println!("All increasing: {:?}", all_increasing);
-    // println!("All decreasing: {:?}", all_decreasing);
-
 
     return all_safe_values && (all_decreasing || all_increasing)
 }
