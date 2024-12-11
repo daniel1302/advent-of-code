@@ -1,10 +1,11 @@
-use rayon::prelude::*;
+use std::collections::HashMap;
 
-fn parse_input(input: &str) -> Vec<u128> {
+
+fn parse_input(input: &str) -> HashMap<u128, usize> {
     input
         .trim()
         .split_whitespace()
-        .map(|stone| stone.parse::<u128>().unwrap())
+        .map(|stone| (stone.parse::<u128>().unwrap(), 1))
         .collect()
 }
 
@@ -31,7 +32,7 @@ fn split_stone(val: u128) -> Option<Vec<u128>> {
         None
     } else {
         let mut higher_half = val;
-        for i in 0..stone_digits/2 {
+        for _ in 0..stone_digits/2 {
             higher_half = higher_half / 10;
         }
 
@@ -42,55 +43,47 @@ fn split_stone(val: u128) -> Option<Vec<u128>> {
     }
 }
 
-fn apply_rule(stone_val: u128) -> Vec<u128> {
-    // If the stone is engraved with the number 0, it is replaced 
-    // by a stone engraved with the number 1.
-    if stone_val == 0 {
-        return vec![1];
-    }
 
-    // If the stone is engraved with a number that has an even number 
-    // of digits, it is replaced by two stones. The left half of the 
-    // digits are engraved on the new left stone, and the right half of 
-    // the digits are engraved on the new right stone. (The new numbers 
-    // don't keep extra leading zeroes: 1000 would become stones 10 
-    // and 0.)
-    if let Some(two_stones) = split_stone(stone_val) {
-        return two_stones;
-    }
-
-    vec![stone_val*2024]
-}
-
-fn blink(initial_stones: &[u128], blinks: usize) -> Vec<u128> {
-    (0..blinks).fold(Vec::from(initial_stones), |acc, _| {
-        let res = acc
+pub fn blink(numbers: &HashMap<u128, usize>, blinks: usize) -> HashMap<u128, usize> {
+    let mut numbers = numbers.clone();
+    (0..blinks).for_each(|_| {
+        numbers = numbers
             .iter()
-            .map(|stone| apply_rule(*stone))
-            .flatten()
-            .collect();
-        res
-    })
+            .fold(HashMap::new(), |mut res: HashMap<u128, usize>, (&stone, count)| {
+  
+                if stone == 0 {
+                    *res.entry(1).or_default() += count;
+                } else if let Some(two_stones) = split_stone(stone) {
+                    *res.entry(two_stones.get(0).unwrap().to_owned()).or_default() += count;
+                    *res.entry(two_stones.get(1).unwrap().to_owned()).or_default() += count;
+                } else {
+                    *res.entry(stone*2024).or_default() += count;    
+                }
+
+                res
+            })
+    });
+
+    numbers
 }
 
 pub fn process_part1(input: &str) -> String {
     let initial_stones = parse_input(input);
-    blink(&initial_stones, 35)
-        .len()
+    blink(&initial_stones, 25)
+        .iter()
+        .map(|(_, num)| {
+            *num
+        })
+        .sum::<usize>()
         .to_string()
 }
 
 pub fn process_part2(input: &str) -> String {
     let initial_stones = parse_input(input);
-
-    blink(&initial_stones, 35)
-        .chunks(5)
-        .enumerate()
-        .par_bridge()
-        .map(|(i, items_chunk)| {
-            println!("Chunk {}/12309881", i);
-            blink(items_chunk, 35)
-                .len()
+    blink(&initial_stones, 75)
+        .iter()
+        .map(|(_, num)| {
+            *num
         })
         .sum::<usize>()
         .to_string()
