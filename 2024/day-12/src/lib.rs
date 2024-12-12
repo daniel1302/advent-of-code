@@ -201,30 +201,3 @@ MMMISSJEEE";
         println!("Normal: {}", process_part2(INPUT));
     }
 }
-
-
-// A region of R plants with price 12 * 10 = 120. v
-// A region of I plants with price 4 * 4 = 16.
-// A region of C plants with price 14 * 22 = 308.
-// A region of F plants with price 10 * 12 = 120.
-// A region of V plants with price 13 * 10 = 130.
-// A region of J plants with price 11 * 12 = 132.
-// A region of C plants with price 1 * 4 = 4.
-// A region of E plants with price 13 * 8 = 104.
-// A region of I plants with price 14 * 16 = 224.
-// A region of M plants with price 5 * 6 = 30.
-// A region of S plants with price 3 * 6 = 18.
-
-
-// RRRRIICCFF
-// RRRRIICCCF
-// VVRRRCCFFF
-// VVRCCCJFFF
-// VVVVCJJCFE
-// VV-VCCJJEE
-// VVIIICJJEE
-// MIIIIIJJEE
-// MIIISIJEEE
-// MMMISSJEEE
-
-//(Bottom, 5),
