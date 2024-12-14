@@ -186,7 +186,7 @@ fn print_robots(robots: &Vec<Robot>, width: i32, height: i32, as_result: bool) -
                     .unwrap() += 1;
         });
 
-        board
+    board
         .iter()
         .enumerate()
         .map(|(y, line)| line
@@ -268,7 +268,7 @@ fn save_robots_bmp(robots: &Vec<Robot>, width: i32, height: i32, iter: usize) {
                     .unwrap() += 1;
         });
 
-        board
+    board
         .iter()
         .enumerate()
         .for_each(|(y, line)| line
