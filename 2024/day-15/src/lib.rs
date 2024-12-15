@@ -81,7 +81,7 @@ impl Warehouse {
             Direction::Left => (-1, 0),
         };
 
-        let current_pos = self.robot_pos.clone();
+        let current_pos = self.robot_pos;
         let mut queue = vec![current_pos];
         let mut last_level = vec![current_pos];
         
@@ -96,16 +96,16 @@ impl Warehouse {
                 if let Some(obj) = current_obj {
                     match obj {
                         Object::BoxBigLeft => {
-                            cur_level.push(current_pos.clone());
+                            cur_level.push(current_pos);
                             if [Direction::Down, Direction::Up].contains(&command) {
-                                cur_level.push(current_pos.clone() + (1, 0).into());
+                                cur_level.push(current_pos + (1, 0).into());
                             }
                         }
                         Object::BoxBigRight => {
-                            cur_level.push(current_pos.clone());
+                            cur_level.push(current_pos);
                             
                             if [Direction::Down, Direction::Up].contains(&command) {
-                                cur_level.push(current_pos.clone() + (-1, 0).into());
+                                cur_level.push(current_pos + (-1, 0).into());
                             }
                         }
                         Object::Wall => {
@@ -113,7 +113,7 @@ impl Warehouse {
                         }
                         Object::Empty => {}
                         _ => {
-                            cur_level.push(current_pos.clone());
+                            cur_level.push(current_pos);
                         }
                     }
 
@@ -151,7 +151,7 @@ impl Warehouse {
         
         queue.reverse();
         for point in queue.iter() {
-            let cur_item = self.board.get_at(&point).unwrap().clone();
+            let cur_item = self.board.get_at(point).unwrap().clone();
             if cur_item == Object::Empty {
                 continue
             }
@@ -162,7 +162,7 @@ impl Warehouse {
             self.board.put_at(*point, Object::Empty);
 
             if cur_item == Object::Robot {
-                self.robot_pos = new_point_coord.clone();
+                self.robot_pos = new_point_coord;
             }
         }
     }
@@ -194,16 +194,15 @@ impl<'this, T> Grid<T> {
 
         let data: Vec<T> = input
             .lines()
-            .map(|line| {
+            .flat_map(|line| {
                 line
                     .chars()
-                    .map(|c| map_func(c))
+                    .map(&map_func)
                     .collect::<Vec<T>>()
             })
-            .flatten()
             .collect();
 
-        Grid { data: data, width: width as i32, height: height as i32 }
+        Grid { data, width: width as i32, height: height as i32 }
     }
 
     pub fn get_at(&self, p: &Vec2) -> Option<&T> {
@@ -227,14 +226,10 @@ impl<'this, T> Grid<T> {
     pub fn find_one<F>(&'this self, f: F) -> Option<Vec2>
         where F: Fn(&'this T) -> bool
     {
-        let find_res = self
+        self
             .find(f)
-            .nth(0);
-
-        match find_res {
-            None => None,
-            Some((pos, _)) => Some(self.pos2point(pos))
-        }
+            .nth(0)
+            .map(|(pos, _)| self.pos2point(pos))
     }
 
     pub fn swap_cells(&mut self, from: &Vec2, to: &Vec2) {
@@ -256,7 +251,7 @@ impl<'this, T> Grid<T> {
             .data
             .chunks(self.width as usize)
             .map(|c| {
-                c.iter().map(|val| map_func(val)).collect::<String>()
+                c.iter().map(&map_func).collect::<String>()
             })
             .collect::<Vec<String>>()
             .join("\n")
@@ -287,14 +282,14 @@ impl<'this, T> Grid<T> {
         let y = pos as i32 / self.width;
         let x = pos as i32 % self.width;
 
-        (x as i32, y as i32).into()
+        (x, y).into()
     }
 }
 
 fn parse_input(input: &str, with_resize: bool) -> Warehouse {
     let input_parts: Vec<&str> = input.split("\n\n").collect();
     let grid_str = {
-        let original_grid = input_parts.get(0).unwrap().to_owned();
+        let original_grid = input_parts.first().unwrap().to_owned();
         if !with_resize {
             original_grid.to_string()
         } else {
@@ -345,7 +340,7 @@ fn parse_input(input: &str, with_resize: bool) -> Warehouse {
     Warehouse{
         robot_pos: grid.find_one(|i| *i == Object::Robot).unwrap(),
         board: grid,
-        commands: commands,
+        commands,
     }
 }
 
