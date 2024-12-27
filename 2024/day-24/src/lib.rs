@@ -233,7 +233,7 @@ impl<'a> Circuit<'a> {
     //  full adder:
     //      SUM     = A ⊻ B ⊻ C_OUT(prev)
     //      C_OUT   = (A ∧ B) ∨ ((A ⊻ B) ∧)
-    pub fn is_valid_adder_expression(&'a self, expr: &'a str, last_bit: bool) -> Option<&'a str> {
+    pub fn check_adder_bit_expression(&'a self, expr: &'a str, last_bit: bool) -> Option<&'a str> {
         if !expr.starts_with("z") {
             panic!("invalid expression given to is_sum_equation");
         }
@@ -317,7 +317,7 @@ pub fn process_part2(input: &str) -> String {
             if !k.starts_with('z') {
                 None
             } else {
-               circuit.is_valid_adder_expression(k, *k == last_bit)
+               circuit.check_adder_bit_expression(k, *k == last_bit)
             }
         }).collect::<Vec<&str>>();
 
