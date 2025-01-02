@@ -232,7 +232,7 @@ impl<'a> Circuit<'a> {
     //      C_OUT   = A ∧ B
     //  full adder:
     //      SUM     = A ⊻ B ⊻ C_OUT(prev)
-    //      C_OUT   = (A ∧ B) ∨ ((A ⊻ B) ∧)
+    //      C_OUT   = (A ∧ B) ∨ ((A ⊻ B) ∧ C)
     pub fn check_adder_bit_expression(&'a self, expr: &'a str, last_bit: bool) -> Option<&'a str> {
         if !expr.starts_with("z") {
             panic!("invalid expression given to is_sum_equation");
